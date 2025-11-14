@@ -362,6 +362,34 @@ func scanRepo(ctx context.Context, httpc *http.Client, token string, job Job, cf
 			}
 		}
 
+		// exclude filters
+		{
+			name_lower := strings.ToLower(name)
+			//ext := strings.ToLower(filepath.Ext(name))
+
+			// ignore '.gitattributes'
+			if name == ".gitattributes" {
+				return nil
+			}
+
+			// ignore 'README.md'
+			if name_lower == "readme.md" {
+				return nil
+			}
+			// ignore 'LICENSE'
+			//if name_lower == "license" {
+			//	return nil
+			//}
+
+			// ignore imatrix files
+			if strings.HasPrefix(name_lower, "imatrix") {
+				return nil
+			}
+			if strings.HasSuffix(name_lower, "imatrix") {
+				return nil
+			}
+		}
+
 		// Build URL and file size
 		var urlStr string
 		if isLFS {
@@ -384,7 +412,7 @@ func scanRepo(ctx context.Context, httpc *http.Client, token string, job Job, cf
 		if sha == "" && n.LFS != nil {
 			sha = n.LFS.Sha256
 		}
-		
+
 		// missing LFS SHA256, use LFS OID as SHA256 instead
 		if isLFS && sha == "" {
 			sha = n.LFS.Oid

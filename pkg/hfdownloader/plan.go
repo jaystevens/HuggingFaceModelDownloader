@@ -74,6 +74,36 @@ func scanRepo(ctx context.Context, httpc *http.Client, token string, job Job, cf
 			}
 		}
 
+		// exclude .gitattributes it is not used outside a git checkout
+		{
+			if name == ".gitattributes" {
+				return nil
+			}
+		}
+
+		// exclude filters
+		{
+			name_lower := strings.ToLower(name)
+			//ext := strings.ToLower(filepath.Ext(name))
+
+			// ignore 'README.md'
+			if name_lower == "readme.md" {
+				return nil
+			}
+			// ignore 'LICENSE'
+			if name_lower == "license" {
+				return nil
+			}
+
+			// ignore imatrix files
+			if strings.HasPrefix(name_lower, "imatrix") {
+				return nil
+			}
+			if strings.HasSuffix(name_lower, "imatrix") {
+				return nil
+			}
+		}
+
 		// Determine which filter (if any) matches this file name, prefer the longest match
 		// Filter matching is case-insensitive (e.g., q4_0 matches Q4_0)
 		matchedFilter := ""
@@ -177,4 +207,3 @@ func ScanPlan(ctx context.Context, job Job, cfg Settings, progress ProgressFunc)
 func Run(ctx context.Context, job Job, cfg Settings, progress ProgressFunc) error {
 	return Download(ctx, job, cfg, progress)
 }
-
